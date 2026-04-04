@@ -14,28 +14,25 @@ if (!$data) { echo json_encode(["success" => false, "error" => "No data"]); exit
 $id = $data['id'] ?? null;
 $name = $conn->real_escape_string($data['name']);
 $email = $conn->real_escape_string($data['email']);
-$password = $data['password'];
+$password = $conn->real_escape_string($data['password']);
 
 if ($id) {
-    // UPDATE: Matches your 'name' and 'email' columns
-    $sql = "UPDATE users SET name='$name', email='$email' WHERE id=$id";
-    if (!$conn->query($sql)) {
-        die(json_encode(["success" => false, "error" => $conn->error]));
-    }
-    
+    // UPDATE LOGIC
     if (!empty($password)) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $conn->query("UPDATE users SET password='$hashed' WHERE id=$id");
+        // Removed password_hash. Saving plain text now.
+        $sql = "UPDATE users SET name='$name', email='$email', password='$password' WHERE id=$id";
+    } else {
+        $sql = "UPDATE users SET name='$name', email='$email' WHERE id=$id";
     }
 } else {
-    // CREATE: Matches your 'name', 'email', 'password', 'role' columns
-    $hashed = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (name, email, password, role) VALUES ('$name', '$email', '$hashed', 'member')";
-    
-    if (!$conn->query($sql)) {
-        die(json_encode(["success" => false, "error" => $conn->error]));
-    }
+    $sql = "INSERT INTO users (name, email, password, role) VALUES ('$name', '$email', '$password', 'member')";
 }
 
-echo json_encode(["success" => true]);
+if ($conn->query($sql)) {
+    echo json_encode(["success" => true]);
+} else {
+    echo json_encode(["success" => false, "error" => $conn->error]);
+}
+
+$conn->close();
 ?>
