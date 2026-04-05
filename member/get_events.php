@@ -10,7 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 include "../config/db.php";
 
-$sql = "SELECT id, title, description, location, date, status FROM events ORDER BY date ASC";
+// Updated SQL: Added "WHERE date >= CURDATE()" to hide past events
+$sql = "SELECT id, title, description, location, date, status 
+        FROM events 
+        WHERE date >= CURDATE() 
+        ORDER BY date ASC";
+
 $result = $conn->query($sql);
 
 $events = [];
