@@ -4,34 +4,36 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') { exit; }
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') exit;
 
 include "../config/db.php";
 
-// Get the JSON data from Next.js
 $data = json_decode(file_get_contents("php://input"), true);
+if (!$data) { echo json_encode(["success" => false, "error" => "No data"]); exit; }
 
-if (isset($data['id']) && isset($data['action'])) {
-    $id = intval($data['id']);
-    $action = $data['action']; // 'Approve' or 'Delete'
+$id = $data['id'] ?? null;
+$name = $conn->real_escape_string($data['name']);
+$email = $conn->real_escape_string($data['email']);
+$password = $conn->real_escape_string($data['password']);
 
-    if ($action === 'Delete') {
-        // Remove from complaints table
-        $sql = "DELETE FROM complaints WHERE id = $id";
+if ($id) {
+    // UPDATE LOGIC
+    if (!empty($password)) {
+        // Removed password_hash. Saving plain text now.
+        $sql = "UPDATE users SET name='$name', email='$email', password='$password' WHERE id=$id";
     } else {
-        // Update status to 'Approved'
-        $sql = "UPDATE complaints SET status = 'Approved' WHERE id = $id";
-    }
-
-    if ($conn->query($sql)) {
-        echo json_encode(["success" => true]);
-    } else {
-        // This will help you see the EXACT SQL error in the console
-        echo json_encode(["success" => false, "error" => $conn->error]);
+        $sql = "UPDATE users SET name='$name', email='$email' WHERE id=$id";
     }
 } else {
-    echo json_encode(["success" => false, "error" => "Missing ID or Action"]);
+    $sql = "INSERT INTO users (name, email, password, role) VALUES ('$name', '$email', '$password', 'member')";
+}
+
+if ($conn->query($sql)) {
+    echo json_encode(["success" => true]);
+} else {
+    echo json_encode(["success" => false, "error" => $conn->error]);
 }
 
 $conn->close();
 ?>
+
