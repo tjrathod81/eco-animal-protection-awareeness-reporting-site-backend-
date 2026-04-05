@@ -1,0 +1,80 @@
+-- eco_db schema
+
+CREATE DATABASE IF NOT EXISTS eco_db;
+USE eco_db;
+
+-- User Table
+CREATE TABLE user (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'member', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dob DATE DEFAULT NULL,
+    address TEXT DEFAULT NULL,
+    phone VARCHAR(20) DEFAULT NULL,
+    profile_pic LONGTEXT DEFAULT NULL
+);
+
+-- Request Table
+CREATE TABLE request (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    type VARCHAR(100) DEFAULT NULL,
+    reference_id INT(11) DEFAULT NULL,
+    status ENUM('Pending', 'Verified', 'Approved', 'Rejected') DEFAULT 'Pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Incidents Table
+CREATE TABLE incidents (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    user_id_proof VARCHAR(100) NOT NULL,
+    user_address TEXT NOT NULL,
+    type ENUM('Animal Cruelty', 'Illegal Tree Cutting') NOT NULL,
+    location TEXT NOT NULL,
+    gps_coordinates VARCHAR(100) DEFAULT NULL,
+    incident_date DATE NOT NULL,
+    incident_time TIME NOT NULL,
+    description TEXT NOT NULL,
+    suggestions TEXT DEFAULT NULL,
+    witness_name VARCHAR(150) DEFAULT NULL,
+    witness_phone VARCHAR(20) DEFAULT NULL,
+    witness_id_proof VARCHAR(100) DEFAULT NULL,
+    evidence_paths TEXT DEFAULT NULL,
+    status ENUM('Pending', 'Verified', 'Action Taken', 'Rejected') DEFAULT 'Pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Events Table
+CREATE TABLE events (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(150) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    location VARCHAR(150) DEFAULT NULL,
+    date DATE DEFAULT NULL,
+    status ENUM('Pending', 'Coming soon', 'Done') DEFAULT 'Pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Complaints Table
+CREATE TABLE complaints (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    user_id INT(11) DEFAULT NULL,
+    type VARCHAR(100) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    location VARCHAR(150) DEFAULT NULL,
+    status ENUM('Pending', 'Verified', 'Approved', 'Rejected') DEFAULT 'Pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+-- Admin Reports Table
+CREATE TABLE admin_reports (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    report_text TEXT NOT NULL,
+    report_type VARCHAR(50) DEFAULT NULL,
+    status ENUM('New', 'Read', 'Resolved') DEFAULT 'New',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    file_path VARCHAR(255) DEFAULT NULL
+);
